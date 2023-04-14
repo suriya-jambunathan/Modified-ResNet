@@ -1,6 +1,10 @@
 # Model Config
 model:
 
+  # Model Store
+  model_store:
+    best_model: "./model_store/best_model.pth"
+    
   # Best Model
   use_model: "zigzag"
 
@@ -126,7 +130,11 @@ data:
 # Train Configuration
 train:
 
-  num_epoochs: 100
+  # Model Store
+  model_store:
+    session_model: "./model_store/session_model.pth"
+
+  num_epochs: 100
 
   # Best Scheduler
   use_scheduler: "reduce_lr_on_plateau"

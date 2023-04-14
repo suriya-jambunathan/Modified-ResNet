@@ -3,21 +3,23 @@ import torch
 class TrainTest():
     def __init__(self, data, model, train_config, device, verbose = True):
         self.train_loader, self.val_loader, self.test_loader = data
-        self.model = model
+        self.model = model.to(device)
+        self.verbose = verbose
+        self.num_epochs = train_config['num_epochs']
         self.criterion = self.get_criterion(train_config['criterion'])
         self.optimizer = self.get_optimizer(train_config['use_optimizer'], 
                                             train_config['optimizers'][train_config['use_optimizer']])
         self.scheduler = self.get_scheduler(train_config['use_scheduler'], 
                                             train_config['schedulers'][train_config['use_scheduler']])
         self.device = device
-        self.verbose = verbose
         self.train_losses = []
         self.train_accuracies = []
         self.val_losses = []
         self.val_accuracies = []
-        metrics_dict = {'train_loss': None, 'train_accuracy': None, 
-                        'val_loss': None, 'val_accuracy': None,
-                        'test_loss': None, 'test_accuracy': None}
+        self.metrics_dict = {'train_loss': None, 'train_accuracy': None, 
+                             'val_loss': None, 'val_accuracy': None,
+                             'test_loss': None, 'test_accuracy': None}
+        self.file_name = train_config['model_store']['session_model']
 
     def get_criterion(self, criterion_id):
         if criterion_id == 'cross_entropy_loss':
@@ -37,6 +39,7 @@ class TrainTest():
                                                               patience=scheduler_config['patience'], verbose=self.verbose))
 
     def train(self):
+        print(f"\nTraining for {self.num_epochs} epochs:\n")
         for epoch in range(self.num_epochs):
             train_accuracy, train_loss = self.train_step(self.train_loader)
             val_accuracy, val_loss = self.eval_step(self.val_loader)
@@ -47,7 +50,7 @@ class TrainTest():
             self.val_accuracies.append(val_accuracy)
             self.val_losses.append(val_loss)
             if self.verbose:
-                print(f"\n\tEpoch: {epoch}")
+                print(f"\n\tEpoch: {epoch+1}/{self.num_epochs}")
                 print(f"\tTraining Loss: {round(train_loss, 4)}; Training Accuracy: {round(train_accuracy*100, 4)}%")
                 print(f"\tValidation Loss: {round(val_loss, 4)}; Validation Accuracy: {round(val_accuracy*100, 4)}%")
         self.metrics_dict['train_loss'] = self.train_losses
@@ -56,6 +59,7 @@ class TrainTest():
         self.metrics_dict['val_accuracy'] = self.val_accuracies
 
     def test(self):
+        print(f"\nTesting:\n")
         self.test_accuracy, self.test_loss = self.eval_step(self.test_loader)
         if self.verbose:
             print(f"\tTest Loss: {round(self.test_loss, 4)}; Test Accuracy: {round(self.test_accuracy*100, 4)}%")
@@ -98,7 +102,7 @@ class TrainTest():
 
         return(train_accuracy, train_loss)
         
-    def evaluate_step(self, data_loader):
+    def eval_step(self, data_loader):
         self.model.eval()
         eval_loss = 0
         correct = 0
@@ -123,3 +127,9 @@ class TrainTest():
         eval_loss = eval_loss/len(data_loader)
         
         return(eval_accuracy, eval_loss)
+    
+    def use_model(self, path):
+        self.model.load_state_dict(torch.load(path))
+
+    def save_model(self):
+        torch.save(self.model.state_dict(), self.file_name)
