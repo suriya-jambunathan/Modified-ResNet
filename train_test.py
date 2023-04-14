@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 
 class TrainTest():
     def __init__(self, data, model, train_config, device, verbose = True):
@@ -37,6 +38,10 @@ class TrainTest():
             return(torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode=scheduler_config['mode'], 
                                                               factor=scheduler_config['factor'], 
                                                               patience=scheduler_config['patience'], verbose=self.verbose))
+        elif scheduler_id == 'zigzag_lr_on_plateau':
+            return(ZigZagLROnPlateau(mode=scheduler_config['mode'], 
+                                     up_factor=scheduler_config['up_factor'], down_factor=scheduler_config['down_factor'],
+                                     up_patience=scheduler_config['up_patience'], down_patience=scheduler_config['down_patience']))
 
     def train(self):
         print(f"\nTraining for {self.num_epochs} epochs:\n")
@@ -133,3 +138,63 @@ class TrainTest():
 
     def save_model(self):
         torch.save(self.model.state_dict(), self.file_name)
+
+class ZigZagLROnPlateau(torch.optim.lr_scheduler._LRScheduler):
+    def __init__(self, optimizer, mode='min', up_factor=1.1, down_factor=0.8, up_patience=10, down_patience=10, verbose=True):
+        super(ZigZagLROnPlateau).__init__()
+        self.optimizer = optimizer
+        self.mode = mode
+        self.up_factor = 1 + up_factor
+        self.down_factor = 1 - down_factor
+        self.up_patience = up_patience
+        self.down_patience = down_patience
+        self.num_bad_epochs = 0
+        self.num_good_epochs = 0
+        self.best_metric = np.Inf if self.mode == 'min' else -np.Inf
+        self.verbose = verbose
+
+    def step(self, metric):
+        if self.mode == 'min':
+            if metric < self.best_metric:
+                self.best_metric = metric
+                self.num_bad_epochs = 0
+                self.num_good_epochs += 1
+                if self.num_good_epochs > self.up_patience:
+                    old_lr = self.optimizer.param_groups[0]['lr']
+                    new_lr = old_lr * self.up_factor
+                    self.optimizer.param_groups[0]['lr'] = new_lr
+                    if self.verbose:
+                        print(f"increasing learning rate of group 0 to {new_lr:.4e}.")
+                    self.num_good_epochs = 0
+            else:
+                self.num_bad_epochs += 1
+                self.num_good_epochs = 0
+                if self.num_bad_epochs > self.down_patience:
+                    old_lr = self.optimizer.param_groups[0]['lr']
+                    new_lr = old_lr * self.down_factor
+                    self.optimizer.param_groups[0]['lr'] = new_lr
+                    if self.verbose:
+                        print(f"reducing learning rate of group 0 to {new_lr:.4e}.")
+                    self.num_bad_epochs = 0
+        else:
+            if metric > self.best_metric:
+                self.best_metric = metric
+                self.num_bad_epochs = 0
+                self.num_good_epochs += 1
+                if self.num_good_epochs > self.up_patience:
+                    old_lr = self.optimizer.param_groups[0]['lr']
+                    new_lr = old_lr * self.up_factor
+                    self.optimizer.param_groups[0]['lr'] = new_lr
+                    if self.verbose:
+                        print(f"increasing learning rate of group 0 to {new_lr:.4e}.")
+                    self.num_good_epochs = 0
+            else:
+                self.num_bad_epochs += 1
+                self.num_good_epochs = 0
+                if self.num_bad_epochs > self.down_patience:
+                    old_lr = self.optimizer.param_groups[0]['lr']
+                    new_lr = old_lr * self.down_factor
+                    self.optimizer.param_groups[0]['lr'] = new_lr
+                    if self.verbose:
+                        print(f"reducing learning rate of group 0 to {new_lr:.4e}.")
+                    self.num_bad_epochs = 0
