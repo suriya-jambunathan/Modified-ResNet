@@ -1,0 +1,173 @@
+# Model Config
+model:
+
+  # Model Store
+  model_store:
+    best_model: "./model_store/best_model.pth"
+    
+  # Best Model
+  use_model: "zigzag"
+
+  # ZigZag ResNet Model
+  zigzag:
+
+    num_classes: 10
+
+    # Block Structure and Congfiguration
+    blocks:
+      block_1:
+        planes: 64
+        count: 2
+        stride: 1
+      block_2:
+        planes: 128
+        count: 2
+        stride: 2
+      block_3:
+        planes: 256
+        count: 2
+        stride: 2
+      block_4:
+        planes: 128
+        count: 2
+        stride: 2
+      block_5:
+        planes: 64
+        count: 2
+        stride: 2
+      block_6:
+        planes: 128
+        count: 1
+        stride: 2
+      block_7:
+        planes: 256
+        count: 1
+        stride: 2
+  
+  # Deep Narrow ResNet Model
+  deep_narrow:
+
+    num_classes: 10
+
+    # Block Structure and Congfiguration
+    blocks:
+      block_1:
+        planes: 32
+        count: 13
+        stride: 1
+      block_2:
+        planes: 64
+        count: 9
+        stride: 2
+      block_3:
+        planes: 128
+        count: 3
+        stride: 2
+      block_4:
+        planes: 256
+        count: 3
+        stride: 2
+
+  # ResNet-18 Model
+  original:
+
+    num_classes: 10
+
+    # Block Structure and Congfiguration
+    blocks:
+      block_1:
+        planes: 64
+        count: 1
+        stride: 1
+      block_2:
+        planes: 128
+        count: 1
+        stride: 2
+      block_3:
+        planes: 256
+        count: 1
+        stride: 2
+      block_4:
+        planes: 512
+        count: 1
+        stride: 2
+
+# Data Config
+data:
+
+  # Dataset
+  name: "CIFAR10"
+  
+  # Validation Split
+  val_split: 0.2
+
+  # Batch Size
+  batch_size: 32
+
+  # Data Augmenations
+  augmentations:
+
+    # Random Crop
+    random_crop:
+      size: 32
+      padding: 4
+
+    # Random Horizontal Flip
+    random_horizontal_flip: 
+      p: 0.5
+
+    #Random Resized Crop
+    random_resized_crop:
+      size: 32
+      scale: (0.8, 1.0)
+      ratio: (0.8, 1.2)
+
+  # Data Normalization
+  normalization:
+    mean: (0.4914, 0.4822, 0.4465)
+    std: (0.2023, 0.1994, 0.2010)
+
+# Train Configuration
+train:
+
+  # Model Store
+  model_store:
+    session_model: "./model_store/session_model.pth"
+
+  num_epochs: 100
+
+  # Best Scheduler
+  use_scheduler: "reduce_lr_on_plateau"
+
+  # Best Optimizer
+  use_optimizer: "sgd"
+
+  # Schedulers Hyperparameter Configuration
+  schedulers:
+
+    # ReduceLROnPlateau
+    reduce_lr_on_plateau:
+      factor: 0.1
+      patience: 0.5
+      mode: 'max'
+
+    # ZigZagLROnPlateau
+    zigzag_lr_on_plateau:
+      up_factor: 0.3
+      down_factor: 0.5
+      up_patience: 1
+      down_patience: 1
+      mode: 'max'
+
+  # Optimizer Hyperparameter Configuration
+  optimizers:
+
+    # SGD
+    sgd:
+      lr: 0.01
+      momentum: 0.8
+      weight_decay: 0.005
+      nesterov: True
+
+  # Criterion
+  criterion: "cross_entropy_loss"
