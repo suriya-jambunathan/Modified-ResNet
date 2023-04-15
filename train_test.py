@@ -1,7 +1,22 @@
+# Importing Required Libraries
 import torch
 import numpy as np
 
 class TrainTest():
+    """
+    Class to define the Training and Testing Utility Functions
+
+    Methods
+    -------
+    get_criterion(criterion_id)
+        Returns Criterion
+
+    get_optimizer(optimizer_id, optimizer_config)
+        Returns Optimizer
+
+    get_scheduler(scheduler_id, scheduler_config)
+        Returns Scheduler
+    """
     def __init__(self, data, model, train_config, device, verbose = True):
         self.train_loader, self.val_loader, self.test_loader = data
         self.model = model.to(device)
