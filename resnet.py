@@ -13,7 +13,7 @@ class BasicBlock(nn.Module):
     Methods
     -------
     forward(x)
-        Returns the output tensor after applying the BasicBlock Layers
+        Returns the output tensor after applying the BasicBlock Layers.
     """
     expansion = 1
     def __init__(self, in_planes, planes, stride=1):
@@ -21,26 +21,28 @@ class BasicBlock(nn.Module):
         Parameters
         ----------
         in_planes: int
-            Shape of the input planes
+            Shape of the input planes.
         planes: int
-            Shape of the output planes
+            Shape of the output planes.
         stride: int
-            Defines Skip Connection
+            Defines Skip Connection.
         """
         super(BasicBlock, self).__init__()
+
+        # First Convolutional Layer
         self.conv1 = nn.Conv2d(in_planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(planes)
+
+        # Second Convolutional Layer
         self.conv2 = nn.Conv2d(planes, planes, kernel_size=3,
                                stride=1, padding=1, bias=False)
         self.bn2 = nn.BatchNorm2d(planes)
 
+        # Defining the Skip Connection
         self.shortcut = nn.Sequential()
         if stride != 1 or in_planes != self.expansion*planes:
-            self.shortcut = nn.Sequential(
-                nn.Conv2d(in_planes, self.expansion*planes,
-                          kernel_size=1, stride=stride, bias=False),
-                nn.BatchNorm2d(self.expansion*planes)
-            )
+            self.shortcut = nn.Sequential(nn.Conv2d(in_planes, self.expansion*planes, kernel_size=1, stride=stride, bias=False),
+                                          nn.BatchNorm2d(self.expansion*planes))
 
     def forward(self, x):
         """
@@ -62,6 +64,7 @@ class BasicBlock(nn.Module):
         out = F.relu(out)
         return out
     
+    
 class ResNet(nn.Module):
     """
     Class to define the custom ResNet Architecture defined by the configuration.
@@ -69,7 +72,7 @@ class ResNet(nn.Module):
     Methods
     -------
     forward(x)
-        Returns the output tensor after applying the ResNet Layers
+        Returns the output tensor after applying the ResNet Layers.
     """
     def __init__(self, basicblock, model_config):
         """
@@ -81,9 +84,17 @@ class ResNet(nn.Module):
             Model Configuration
         """
         super(ResNet, self).__init__()
+
+        # Number of Classes
         num_classes = model_config['num_classes']
+
+        # Blocks Configurations
         blocks = model_config['blocks']
+
+        # Block Names
         block_keys = list(blocks.keys())
+
+        # Input Layer's output Channel count
         self.in_planes = blocks[block_keys[0]]['planes']
 
         # First Layer

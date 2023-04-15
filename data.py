@@ -23,10 +23,19 @@ class Data():
             about validation split, batch size, data augmentations
             specifications, and normalization.
         """
+        # Dataset Name
         self.dataset = data_config['name']
+
+        # Validation split from train
         self.val_split = data_config['val_split']
+
+        # Data Loader Batch Size
         self.batch_size = data_config['batch_size']
+
+        # Augmentations Configurations
         self.augmentations = data_config['augmentations']
+
+        # Normalization Configuration
         self.normalization = data_config['normalization']
 
     def get_data(self):
@@ -39,8 +48,10 @@ class Data():
         -------
         train_loader: torch.utils.data.DataLoader
             Training Set Data Loader
+            
         val_loader: torch.utils.data.DataLoader
             Validation Set Data Loader
+            
         test_loader: torch.utils.data.DataLoader
             Testing Set Data Loader
         """
@@ -48,11 +59,17 @@ class Data():
         aug_transformations = []
         for augmentation in list(self.augmentations.keys()):
             aug_params = self.augmentations[augmentation]
+
+            # Random Crop
             if augmentation == 'random_crop':
                 aug_transformations.append(torchvision.transforms.RandomCrop(size=aug_params['size'], 
                                                                          padding=aug_params['padding']))
+            
+            # Random Horizontal Flip
             elif augmentation == 'random_horizontal_flip':
                 aug_transformations.append(torchvision.transforms.RandomHorizontalFlip(p=aug_params['p']))
+
+            # Random Resized Crop
             elif augmentation == 'random_resized_crop':
                 aug_transformations.append(torchvision.transforms.RandomResizedCrop(size=aug_params['size'], 
                                                                                     scale=ast.literal_eval(aug_params['scale']), 
@@ -80,7 +97,7 @@ class Data():
             trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train)
             testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_test)
 
-        # Split the Train Data into Train and Validation Sets
+        # Split the Train Set into Train and Validation Sets
         val_size = int( self.val_split * len(trainset))
         train_size = len(trainset) - val_size
         trainset, valset = torch.utils.data.random_split(trainset, [train_size, val_size])
