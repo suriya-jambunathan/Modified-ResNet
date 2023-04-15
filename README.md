@@ -20,7 +20,7 @@ valuable asset for various applications
 
 ## Architecture
 
-![plot](./home/shubham/Downloads/zigzag_resnet.png.png?raw=true "Title")
+![Architecture](/zigzag_resnet.png)
 
 ## Results
 
