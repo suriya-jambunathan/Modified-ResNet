@@ -1,3 +1,4 @@
+import ast
 import torch
 import torchvision
 
@@ -21,12 +22,13 @@ class Data():
                 aug_transformations.append(torchvision.transforms.RandomHorizontalFlip(p=aug_params['p']))
             elif augmentation == 'random_resized_crop':
                 aug_transformations.append(torchvision.transforms.RandomResizedCrop(size=aug_params['size'], 
-                                                                                scale=aug_params['scale'], 
-                                                                                ratio=aug_params['ratio']))
+                                                                                    scale=ast.literal_eval(aug_params['scale']), 
+                                                                                    ratio=ast.literal_eval(aug_params['ratio'])))
         
         default_transformations = []
         default_transformations.append(torchvision.transforms.ToTensor())
-        default_transformations.append(torchvision.transforms.Normalize(mean=self.normalization['mean'], std=self.normalization['std']))
+        default_transformations.append(torchvision.transforms.Normalize(mean=ast.literal_eval(self.normalization['mean']), 
+                                                                        std=ast.literal_eval(self.normalization['std'])))
 
         train_transformations = []
         train_transformations.extend(aug_transformations)
