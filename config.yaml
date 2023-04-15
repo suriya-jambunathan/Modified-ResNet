@@ -166,7 +166,7 @@ train:
     sgd:
       lr: 0.01
       momentum: 0.8
-      weight_decay: 0.005
+      weight_decay: 0.0005
       nesterov: True
 
   # Criterion
