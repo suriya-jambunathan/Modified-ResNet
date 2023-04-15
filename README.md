@@ -1,5 +1,7 @@
 # Modified-ResNet
 
+![Python](https://img.shields.io/badge/Python-3.10-blue)
+
 ## Introduction
 The aim of this project is to optimize results using
 the ResNet architecture and a comprehensive hyper-
@@ -46,3 +48,26 @@ perparameters, our model has achieved an accuracy of
 that the ZigZag ResNet architecture, along with the
 selected hyperparameters, is a powerful tool for image
 classification tasks on the CIFAR-10 dataset.
+
+## Usage
+
+To use this Python script, you can pass in system arguments to customize the training and testing process. The following arguments are available:
+
+- `--train`: Enables training the model.
+- `--test`: Enables testing the model.
+- `--num_epochs <int>`: Sets the number of epochs to train the model. The default is set to 100.
+- `--cuda`: Enables the use of CUDA if available.
+
+Example usage:
+
+To train the model for 50 epochs using CUDA, run the following command:
+
+```python
+python main.py --train --num_epochs 50 --cuda
+```
+
+To test the saved model, run the following command:
+
+```python
+python main.py --test
+```
